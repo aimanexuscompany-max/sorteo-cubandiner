@@ -209,6 +209,7 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
   var KEY = "cd-giveaway-bvsc-2026";
 
   var $ = function (id) { return document.getElementById(id); };
+  document.querySelectorAll('a[href="#rules"]').forEach(function (a) { a.addEventListener('click', function () { document.getElementById('rules').open = true; }); });
   var form = $("f"), err = $("err"), done = $("done"), visit = $("visit"), review = $("review");
 
   function store(get, v) { try { return get ? localStorage.getItem(KEY) : localStorage.setItem(KEY, v); } catch (e) { return null; } }
