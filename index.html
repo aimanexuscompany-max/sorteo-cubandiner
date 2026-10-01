@@ -57,6 +57,10 @@ textarea{min-height:88px;resize:vertical}
 .chips input:focus-visible+label{outline:3px solid var(--amarillo);outline-offset:2px}
 .visit{display:none;background:#fff;border:2px dashed var(--linea);border-radius:14px;padding:14px;margin-bottom:16px}
 .visit.show{display:block}
+.igbox{display:none}
+.igbox.show{display:block}
+.hint{font-size:13px;line-height:1.45;margin-top:8px}
+.hint a{color:var(--verde);font-weight:800}
 .stars{display:flex;gap:6px}
 .stars input{position:absolute;opacity:0;pointer-events:none}
 .stars label{flex:1;text-align:center;cursor:pointer;border:2px solid var(--linea);border-radius:10px;padding:8px 0;font-weight:800;font-size:17px;background:var(--crema)}
@@ -138,6 +142,12 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
         </div>
       </div>
 
+      <div class="field igbox" id="igbox">
+        <label class="l" for="ig">Your Instagram username <span class="req">*</span></label>
+        <input id="ig" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="@yourname">
+        <p class="hint">Entering from Instagram? Follow <a href="https://www.instagram.com/thecubandiner/" target="_blank" rel="noopener">@thecubandiner</a> and like our pinned giveaway post. We check this for the winners.</p>
+      </div>
+
       <div class="visit" id="visit">
         <span style="display:block;font-weight:800;font-size:15px;margin-bottom:8px">How was your visit today? <span style="font-weight:600;opacity:.7">(optional)</span></span>
         <div class="stars">
@@ -179,11 +189,12 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
     <p><b>NO PURCHASE OR VISIT NECESSARY.</b> A purchase will not increase your chances of winning.</p>
     <p><b>Sponsor:</b> Cuban Diner, 1484 Roswell Rd, Marietta, GA 30062.</p>
     <p><b>Eligibility:</b> Legal U.S. residents 18 or older. Employees of Cuban Diner and their immediate families are not eligible.</p>
-    <p><b>How to enter:</b> Complete the entry form on this page between September 30, 2026 and October 21, 2026 at 11:59 PM ET. One entry per person; duplicate entries will be disqualified.</p>
+    <p><b>How to enter:</b> Complete the entry form on this page between September 30, 2026 and October 21, 2026 at 11:59 PM ET, either at Cuban Diner (scan the QR code on your table) or from the link in our Instagram bio. One entry per person, by any method; duplicate entries will be disqualified.</p>
+    <p><b>Instagram entries:</b> If you enter from Instagram, you must follow @thecubandiner and like the giveaway post. We will verify the winner; if a winner who entered from Instagram does not meet these requirements, an alternate winner will be drawn at random.</p>
     <p><b>Prizes:</b> Two (2) winners will each receive two (2) tickets to Buena Vista Social Club at the Fox Theatre, Atlanta, on October 27, 2026. One (1) winner will receive a $50 Cuban Diner gift card. Prizes have no cash value.</p>
     <p><b>Drawing:</b> Winners will be selected at random from all eligible entries on October 22, 2026, and contacted by phone or email. A winner who does not respond within 48 hours forfeits the prize, and an alternate winner will be selected. Odds of winning depend on the number of eligible entries.</p>
     <p><b>Privacy:</b> Your information is used to run this giveaway and, only if you check "Yes! Text and email me Cuban Diner specials", to send you Cuban Diner offers. We never sell your information.</p>
-    <p>This giveaway is not sponsored, endorsed or administered by, or affiliated with, the Fox Theatre, Buena Vista Social Club, Instagram or Meta. Void where prohibited.</p>
+    <p>By entering, each entrant fully releases Instagram and Meta from any liability related to this giveaway. This giveaway is not sponsored, endorsed or administered by, or affiliated with, the Fox Theatre, Buena Vista Social Club, Instagram or Meta. Void where prohibited.</p>
   </details>
 </main>
 
@@ -201,7 +212,8 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
   var FALLBACK = "https://docs.google.com/forms/d/e/1FAIpQLSfS4-jOwUvLiZmULMGRHZhsqe35mcDsk_1H6xdUBQHWcf4zOw/viewform";
   var E = {
     name: "entry.388797137", phone: "entry.1066786288", email: "entry.606193927", src: "entry.1389442314",
-    rate: "entry.2031929912", comment: "entry.425664748", elig: "entry.330567300", optin: "entry.1279346218"
+    rate: "entry.2031929912", comment: "entry.425664748", elig: "entry.330567300", optin: "entry.1279346218",
+    ig: "entry.1908802040"
   };
   var ELIG_VALUE = "I'm 18 or older and I agree to the official rules at the bottom of this form.";
   var OPTIN_VALUE = "Yes! Text and email me Cuban Diner specials. I agree to receive recurring automated marketing texts from Cuban Diner at the number above. Consent is not required to enter. Msg & data rates may apply. Reply STOP to opt out.";
@@ -210,14 +222,18 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
 
   var $ = function (id) { return document.getElementById(id); };
   document.querySelectorAll('a[href="#rules"]').forEach(function (a) { a.addEventListener('click', function () { document.getElementById('rules').open = true; }); });
-  var form = $("f"), err = $("err"), done = $("done"), visit = $("visit"), review = $("review");
+  var form = $("f"), err = $("err"), done = $("done"), visit = $("visit"), review = $("review"), igbox = $("igbox");
 
   function store(get, v) { try { return get ? localStorage.getItem(KEY) : localStorage.setItem(KEY, v); } catch (e) { return null; } }
   function selected(name) { var el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
-  function showDone(atDiner, again) {
+  function showDone(atDiner, again, viaIG) {
     form.style.display = "none"; done.classList.add("show");
     review.classList.toggle("show", !!atDiner);
-    if (again) $("doneMsg").innerHTML = "You're already entered from this device. Winners will be drawn at random on <b>October 22</b> and contacted by phone or email.";
+    var msg = again
+      ? "You're already entered from this device. Winners will be drawn at random on <b>October 22</b> and contacted by phone or email."
+      : "Winners will be drawn at random on <b>October 22</b> and contacted by phone or email. Watch our Instagram for the live draw.";
+    if (viaIG) msg += " <b>Entered from Instagram?</b> Make sure you follow @thecubandiner and like our pinned giveaway post. We check this before announcing the winners.";
+    $("doneMsg").innerHTML = msg;
     done.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   function fail(msg) { err.innerHTML = msg; err.classList.add("show"); err.scrollIntoView({ behavior: "smooth", block: "center" }); }
@@ -229,13 +245,16 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
   var p = new URLSearchParams(location.search), s = (p.get("src") || "").toLowerCase();
   if (s === "ig" || s === "instagram") $("s2").checked = true;
   if (s === "qr" || s === "table") $("s1").checked = true;
-  function syncVisit() { visit.classList.toggle("show", selected("src") === "I'm at Cuban Diner"); }
+  function syncVisit() {
+    visit.classList.toggle("show", selected("src") === "I'm at Cuban Diner");
+    igbox.classList.toggle("show", selected("src") === "Instagram");
+  }
   document.querySelectorAll('input[name="src"]').forEach(function (r) { r.addEventListener("change", syncVisit); });
   syncVisit();
 
   // Soft duplicate guard (the real check happens before the draw)
   if (p.get("preview") === "thanks") { showDone(true); return; }
-  var prev = store(true); if (prev) { showDone(prev === "diner", true); return; }
+  var prev = store(true); if (prev) { showDone(prev === "diner", true, prev === "ig"); return; }
 
   form.addEventListener("submit", function (ev) {
     ev.preventDefault(); err.classList.remove("show");
@@ -245,6 +264,8 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
     if (digits.length < 10 || digits.length > 11) return fail("Please enter a valid mobile number (10 digits).");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("Please enter a valid email.");
     if (!src) return fail("Please tell us where you're entering from.");
+    var ig = $("ig").value.trim().replace(/^@+/, "");
+    if (src === "Instagram" && !/^[A-Za-z0-9._]{1,30}$/.test(ig)) return fail("Please enter your Instagram username (for example: @yourname).");
     if (!$("elig").checked) return fail("Please confirm you're 18 or older and agree to the official rules.");
 
     var body = new URLSearchParams();
@@ -254,13 +275,17 @@ footer .logo{width:110px;display:block;margin:0 auto 12px}
       if (rate) body.append(E.rate, rate);
       if (comment) body.append(E.comment, comment);
     }
+    if (src === "Instagram") body.append(E.ig, "@" + ig);
     body.append(E.elig, ELIG_VALUE);
     if ($("optin").checked) body.append(E.optin, OPTIN_VALUE);
     body.append("fvv", "1"); body.append("pageHistory", "0");
 
     var btn = $("go"); btn.disabled = true; btn.textContent = "SENDING…";
     fetch(FORM, { method: "POST", mode: "no-cors", body: body })
-      .then(function () { store(false, src === "I'm at Cuban Diner" ? "diner" : "other"); showDone(src === "I'm at Cuban Diner"); })
+      .then(function () {
+        store(false, src === "I'm at Cuban Diner" ? "diner" : (src === "Instagram" ? "ig" : "other"));
+        showDone(src === "I'm at Cuban Diner", false, src === "Instagram");
+      })
       .catch(function () {
         btn.disabled = false; btn.textContent = "ENTER THE GIVEAWAY";
         fail('We couldn\'t send your entry. Please check your connection and try again, or <a href="' + FALLBACK + '" target="_blank" rel="noopener">enter here instead</a>.');
